@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+body { @apply bg-cream text-ink antialiased; }
+.btn { @apply inline-flex items-center justify-center rounded-md bg-forest px-4 py-2 text-sm font-medium text-white hover:bg-forest/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-forest disabled:opacity-50; }
+.btn-ghost { @apply inline-flex items-center rounded-md border border-ink/15 px-4 py-2 text-sm hover:bg-sage; }
+.input { @apply w-full rounded-md border border-ink/20 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-forest; }
