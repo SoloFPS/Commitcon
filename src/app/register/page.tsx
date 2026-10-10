@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Building2,
@@ -20,9 +20,11 @@ export default function Register() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
-  const [lat, setLat] = useState("40.7128");
-  const [lng, setLng] = useState("-74.0060");
+  const [lat, setLat] = useState("");
+  const [lng, setLng] = useState("");
   const [locating, setLocating] = useState(false);
+  const [locationMessage, setLocationMessage] = useState("");
+  const autoLocationRequested = useRef(false);
 
   const list = (v: unknown) =>
     String(v ?? "")
@@ -30,24 +32,45 @@ export default function Register() {
       .map((s) => s.trim())
       .filter(Boolean);
 
-  function handleGetLocation() {
+  const handleGetLocation = useCallback(() => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      setLocationMessage("Location detection is not supported by your browser. Enter your coordinates manually.");
       return;
     }
     setLocating(true);
+    setLocationMessage("Waiting for location permission…");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setLat(pos.coords.latitude.toFixed(4));
-        setLng(pos.coords.longitude.toFixed(4));
+        setLat(pos.coords.latitude.toFixed(6));
+        setLng(pos.coords.longitude.toFixed(6));
         setLocating(false);
+        setLocationMessage("Location detected. You can adjust the coordinates if needed.");
       },
       (err) => {
-        alert("Unable to retrieve location: " + err.message);
         setLocating(false);
-      }
+        if (err.code === err.PERMISSION_DENIED) {
+          setLocationMessage(
+            "Location permission was denied. Allow access in your browser settings, try again, or enter coordinates manually."
+          );
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          setLocationMessage(
+            "Your location is unavailable right now. Try again or enter coordinates manually."
+          );
+        } else {
+          setLocationMessage(
+            "Location detection timed out. Try again or enter coordinates manually."
+          );
+        }
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
     );
-  }
+  }, []);
+
+  useEffect(() => {
+    if (autoLocationRequested.current) return;
+    autoLocationRequested.current = true;
+    handleGetLocation();
+  }, [handleGetLocation]);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -214,7 +237,7 @@ export default function Register() {
                 className="flex items-center gap-1 text-[11px] font-semibold text-forest hover:underline"
               >
                 <Compass className="h-3 w-3" />
-                {locating ? "Detecting…" : "Detect Current Location"}
+                {locating ? "Detecting…" : "Try Location Again"}
               </button>
             </div>
 
@@ -243,6 +266,9 @@ export default function Register() {
               </div>
             </div>
             <p className="mt-2 text-[10px] text-ink/50">
+              {locationMessage || "We'll ask for permission to detect your location automatically. You can enter coordinates manually if you prefer."}
+            </p>
+            <p className="mt-1 text-[10px] text-ink/50">
               Coordinates enable the smart matching engine to calculate real transit feasibility.
             </p>
           </div>
