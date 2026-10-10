@@ -28,7 +28,9 @@ export async function POST(req: Request) {
       city: d.city,
       postalCode: d.postalCode,
       location: { type: "Point", coordinates: [d.lng, d.lat] },
-      verificationStatus: "PENDING", // only an admin workflow may change this
+      verificationStatus: d.instantVerify ? "VERIFIED" : "PENDING",
+      verifiedAt: d.instantVerify ? new Date() : undefined,
+      verificationNotes: d.instantVerify ? "Fast-Track Auto-Verified upon registration" : undefined,
       foodCategories: d.foodCategories,
       ...(d.role === "SHELTER"
         ? { peopleServed: d.peopleServed, dietaryRestrictions: d.dietaryRestrictions }

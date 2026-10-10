@@ -17,6 +17,7 @@ const base = z.object({
   city: z.string().min(2),
   postalCode: z.string().min(3),
   acceptTerms: z.literal(true, { errorMap: () => ({ message: "You must accept the terms" }) }),
+  instantVerify: z.boolean().optional(),
   ...coords,
 });
 
@@ -107,4 +108,31 @@ export const shelterProfileSchema = z.object({
 export const adminVerifyOrgSchema = z.object({
   status: z.enum(["VERIFIED", "REJECTED"]),
   notes: z.string().max(500).optional(),
+});
+
+export const verifyOrgSchema = z.object({
+  registrationNumber: z.string().max(80).optional(),
+  documentType: z.string().max(80).optional(),
+  notes: z.string().max(500).optional(),
+  instantVerify: z.boolean().optional().default(true),
+});
+
+export const orgProfileSchema = z.object({
+  contactName: z.string().min(2).optional(),
+  phone: z.string().min(7).optional(),
+  address: z.string().min(5).optional(),
+  city: z.string().min(2).optional(),
+  postalCode: z.string().min(3).optional(),
+  category: z.string().min(2).optional(),
+  peopleServed: z.coerce.number().int().min(1).optional(),
+  capacityKg: z.coerce.number().min(0).optional(),
+  foodCategories: z.array(z.string()).optional(),
+  dietaryRestrictions: z.array(z.string()).optional(),
+  storageTypes: z.array(z.string()).optional(),
+  operatingHours: z
+    .object({
+      open: z.string().min(4).max(5),
+      close: z.string().min(4).max(5),
+    })
+    .optional(),
 });

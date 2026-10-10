@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: Request) {
   try {
-    const actor = await requireActor("SHELTER");
+    const actor = await requireActor(["SHELTER", "PROVIDER"]);
     await connectDB();
 
     const org = await Organization.findById(actor.orgId).lean();
@@ -21,7 +21,7 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) {
   try {
-    const actor = await requireActor("SHELTER");
+    const actor = await requireActor(["SHELTER", "PROVIDER"]);
     const body = await req.json();
     const validated = shelterProfileSchema.parse(body);
 
